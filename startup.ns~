@@ -1,0 +1,7 @@
+import * as serverList from 'serverList.ns';
+
+export async function main(ns) {
+    await serverList.main(ns);
+    ns.run('stockController.ns',1);
+    ns.spawn('main.ns',1);
+}

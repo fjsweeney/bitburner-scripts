@@ -1,0 +1,28 @@
+import {serverList} from 'netdata.ns';
+export function distribute(ns,script,threads,arg1,arg2){
+    let threadsStarted = 0;
+    for(let i = 0; i < serverList.length; i++){
+        let server = serverList[i];
+        let ram = ns.getServerMaxRam(server)-ns.getServerUsedRam(server);
+        if(server=="home"){
+            ram -= 40;
+        }
+        let serverThreads = Math.floor(Math.min(threads,ram/ns.getScriptRam(script)));
+        if(serverThreads>0){
+            if(ns.exec(script,server,serverThreads,arg1,arg2)){
+                threadsStarted += serverThreads;
+            }
+        }
+        if(threadsStarted >= threads){
+            break;
+        }
+    }
+    if(threadsStarted>0){
+        ns.print("Started "+threadsStarted+" of "+script+" "+arg1+" "+arg2);
+    }
+    return threadsStarted;
+}
+//run distribute.ns /scripts/rh.script 1000000 joesguns true
+export async function main(ns) {
+    distribute(ns,ns.args[0],ns.args[1],ns.args[2],ns.args[3]);
+}

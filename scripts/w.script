@@ -1,0 +1,5 @@
+if(args.length<1){
+    tprint('weaken called without a target');
+    exit();
+}
+weaken(args[0]);

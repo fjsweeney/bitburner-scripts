@@ -1,0 +1,16 @@
+let scripts = {
+    "Merge Overlapping Intervals":"/contracts/mergeIntervals.ns",
+    "Algorithmic Stock Trader I":"/contracts/stockTrader.ns",
+    "Algorithmic Stock Trader II":"/contracts/stockTrader.ns",
+    "Algorithmic Stock Trader III":"/contracts/stockTrader.ns",
+    "Algorithmic Stock Trader IV":"/contracts/stockTrader.ns",
+    "Spiralize Matrix":"/contracts/spiralize.ns",
+    "Find Largest Prime Factor":"/contracts/prime.ns",
+    "Subarray with Maximum Sum":"/contracts/maxSum.ns",
+    "Unique Paths in a Grid I":"/contracts/grid.ns",
+    "Unique Paths in a Grid II":"/contracts/grid.ns",
+    "Minimum Path Sum in a Triangle":"/contracts/minSum.ns"
+};
+export async function main(ns) {
+    ns.spawn(scripts[ns.getContractType(ns.args[0],ns.args[1])],1, ns.args[0],ns.args[1]);
+}

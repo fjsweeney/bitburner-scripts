@@ -1,0 +1,33 @@
+export function getRootAccess(ns,computer){
+    //open the ports
+    let portOpeners = [ns.brutessh,ns.ftpcrack,ns.relaysmtp,ns.httpworm,ns.sqlinject];
+    for(let i = 0; i < portOpeners.length; i++){
+        try {
+            portOpeners[i](computer);
+        } catch (e) {
+            //we don't have that portOpener
+        }
+    }
+    //start system scripts
+    try{
+        // get access
+        ns.nuke(computer);
+        
+        //prep system for running scripts
+        let scripts = ns.ls("home","/scripts/");
+        for(let i=0;i<scripts.length;i++){
+            ns.scp(scripts[i],"home",computer);
+        }
+        return true;
+    } catch (e){
+        //not enough ports opened.
+        return false;
+    }
+}
+export async function main(ns) {
+    if(ns.args[0].length != 1){
+        ns.tprint("usage:\n run root.ns [servername]");
+        ns.exit();
+    }
+    getRootAccess(ns,ns.args[0]);
+}

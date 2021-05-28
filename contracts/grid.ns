@@ -1,0 +1,52 @@
+export function gridPaths(arr){
+    if(arr[0][0]==1){
+        return 0;
+    }
+    if(arr.length==1){
+        if(arr[0].every(item => {return item == 0;})){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    if(arr[0].length==1){
+        if(arr.every(item => {return item[0] == 0;})){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    let down = gridPaths(arr.slice(1));
+    let rightArr = [];
+    for(let i = 0; i<arr.length;i++){
+        rightArr.push(arr[i].slice(1));
+    }
+    let right = gridPaths(rightArr);
+    return down + right;
+}
+export function solve(ns,contract,server){
+    let arr = [];
+    switch(ns.codingcontract.getContractType(contract,server)){
+        case "Unique Paths in a Grid I":
+            let dim = ns.codingcontract.getData(contract,server);
+            let row = [];
+            for(let i = 0; i < dim[1]; i++){
+                row.push(0);
+            }
+            for(let i = 0; i < dim[0];i++){
+                arr.push(row);
+            }
+            break;
+        case "Unique Paths in a Grid II":
+            arr = ns.codingcontract.getData(contract,server);
+            break;
+    }
+    return gridPaths(arr);
+}
+export async function main(ns) {
+    ns.tprint(
+        ns.codingcontract.attempt(
+            solve(ns,ns.args[0],ns.args[1]),
+        ns.args[0],ns.args[1],{"returnReward":true})
+    );
+}

@@ -1,0 +1,31 @@
+export function minSum(arr){
+    if(arr.length==1){
+        return arr[0][0];
+    }
+    if(arr.length==0){
+        return 0;
+    }
+    let t1 = [];
+    let t2 = [];
+    for(let i = 1; i<arr.length;i++){
+        let t1row = [];
+        let t2row = [];
+        for(let j = 0; j<i; j++){
+            t1row.push(arr[i][j]);
+            t2row.push(arr[i][j+1]);
+        }
+        t1.push(t1row);
+        t2.push(t2row);
+    }
+    return arr[0][0] + Math.min(minSum(t1),minSum(t2));
+}
+export function solve(ns,contract,server){
+    return minSum(ns.codingcontract.getData(contract,server));
+}
+export async function main(ns) {
+     ns.tprint(
+        ns.attempt(
+            solve(ns,ns.args[0],ns.args[1]),
+        ns.args[0],ns.args[1],{"returnReward":true})
+    );
+}

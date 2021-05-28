@@ -1,0 +1,23 @@
+export function sumWays(number){
+    let ways = [1];
+    ways.length = number + 1;
+    ways.fill(0, 1);
+    for (let i = 1; i < number; ++i) {
+        for (let j = i; j <= number; ++j) {
+            ways[j] += ways[j - i];
+        }
+    }
+
+    return ways[number];
+    
+}
+export function solve(ns,contract,server){
+    return sumWays(ns.codingcontract.getData(contract,server));
+}
+export async function main(ns) {
+    ns.tprint(
+        ns.codingcontract.attempt(
+            solve(ns,ns.args[0],ns.args[1]),
+        ns.args[0],ns.args[1],{"returnReward":true})
+    );
+}

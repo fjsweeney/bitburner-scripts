@@ -1,0 +1,8 @@
+import {serverList} from 'netdata.ns';
+export async function main(ns){
+    serverList.forEach(computer => {
+        if(computer=='home'){return;}
+        ns.killall(computer);
+    });
+    ns.killall('home');
+}

@@ -1,0 +1,61 @@
+export function greedyStocks(stocks){
+    if(stocks.length <= 1) {return 0;}
+    if(stocks[0]>stocks[1]){
+        return greedyStocks(stocks.slice(1));
+    }
+    let i = 1;
+    //9,10,11,12,11
+    while(i<stocks.length && stocks[i-1]<stocks[i]){
+        i++;
+    }
+    return stocks[i-1]-stocks[0]+greedyStocks(stocks.slice(i));
+    
+}
+//brute
+export function stockTrader(maxTrades,stocks){
+    if(maxTrades<=0){return 0;}
+    if(stocks.length <= 1) {return 0;}
+    let maxprofit=0;
+    for(let i = 0; i < stocks.length-1; i++){
+        for(let j = i+1; j<stocks.length;j++){
+            let profit = (stocks[j]-stocks[i]) + stockTrader(maxTrades-1,stocks.slice(j+1));
+            if(profit>maxprofit){
+                maxprofit=profit;
+            }
+        }
+    }
+    return maxprofit;
+}
+export function solve(ns,contract,server){
+    let maxTrades = 0;
+    let data = [];
+    switch(ns.codingcontract.getContractType(contract,server)){
+        case "Algorithmic Stock Trader I":
+            //validated!
+            maxTrades = 1;
+            data = ns.codingcontract.getData(contract,server);
+            break;
+        case "Algorithmic Stock Trader II":
+            //validated?
+            data = ns.codingcontract.getData(contract,server);
+            return greedyStocks(data);
+        case "Algorithmic Stock Trader III":
+            // 4 is validated, so this is too!
+            maxTrades = 2;
+            data = ns.codingcontract.getData(contract,server);
+            break;
+        case "Algorithmic Stock Trader IV":
+            //validated!
+            maxTrades = ns.codingcontract.getData(contract,server)[0];
+            data = ns.codingcontract.getData(contract,server)[1];
+            break;
+    }
+    return stockTrader(maxTrades,data);
+}
+export async function main(ns) {
+    ns.tprint(
+        ns.codingcontract.attempt(
+            solve(ns,ns.args[0],ns.args[1]),
+        ns.args[0],ns.args[1],{"returnReward":true})
+    );
+}

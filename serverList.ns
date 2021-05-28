@@ -1,0 +1,23 @@
+export var netdata = {};
+export var serverList = [];
+export function dfs(ns,computer,source){
+    serverList.push(computer);
+    netdata[computer]=source;
+    let toScan = ns.scan(computer);
+    while(toScan.length > 0){
+        let node = toScan.shift();
+        if(node==source){continue;}
+        dfs(ns,node,computer);
+    }
+}
+export function refresh(ns){
+    netdata = {};
+    serverList = [];
+    dfs(ns,"home","home");
+    ns.write("netdata.ns","export var serverList = " + JSON.stringify(serverList,null,1),"w");
+    ns.write("netdata.ns",";\nexport var netdata = " + JSON.stringify(netdata,null,1)+";","a");
+}
+export async function main(ns) {
+    refresh(ns);
+    ns.tprint(serverList);
+}

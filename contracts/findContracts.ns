@@ -1,0 +1,19 @@
+import {getPathStr} from 'getInfo.ns';
+import {serverList} from 'serverList.ns';
+export function getContracts(ns,server){
+    return ns.ls(server,".cct");
+}
+export function showContracts(ns,server){
+    let contracts = getContracts(ns,server);
+    let pathStr = getPathStr(ns,server);
+    while(contracts.length>0){
+        let contract = contracts.shift();
+        ns.tprint(pathStr + ' run '+contract+';\n');
+        ns.tprint(ns.codingcontract.getContractType(contract,server));
+    }
+}
+export async function main(ns){
+    serverList.forEach(server => {
+        showContracts(ns,server);
+    });
+}

@@ -1,0 +1,108 @@
+////run main.ns
+import {getRootAccess} from 'root.ns';
+import {hackPriority} from "priority.ns";
+import {serverList} from 'netdata.ns';
+import {distribute} from 'distribute.ns';
+import {makePrices} from 'stockSettings.ns';
+
+//security constants
+let hackSec = 0.002;
+let weakSec = 0.05;
+let growSec = 0.004;
+
+//servers: things that can run scripts
+export function getServerdata(ns,servers){
+    let serverdata = {};
+    servers.forEach(host => {
+        if(ns.hasRootAccess(host) && ns.getServerMaxRam(host) > 0){
+            let data = {};
+            ns.scp(ns.ls("home","/scripts/"),"home",host);
+            data.runningScripts = ns.ps(host);
+            serverdata[host]=data;
+        }
+    });
+    return serverdata;
+}
+//hackables: things that can have accessible money
+export function getHackdata(ns, servers){
+    let hackdata = {};
+    servers.forEach(host => {
+        if(ns.hasRootAccess(host) &&
+           ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel() && 
+           ns.getServerMaxMoney(host) > 0 &&
+           host != 'home'){
+            let data = {};
+            data.numWeakensNeeded = Math.ceil(
+                (ns.getServerSecurityLevel(host) + 1 - ns.getServerMinSecurityLevel(host))/weakSec
+            );
+            data.numGrowsNeeded = Math.ceil(
+                ns.growthAnalyze(host,ns.getServerMaxMoney(host)/
+                                 Math.max(1,ns.getServerMoneyAvailable(host)))
+            );
+            data.numHacksNeeded = Math.max(
+                1,Math.floor(ns.hackAnalyzeThreads(host,ns.getServerMoneyAvailable(host)*0.25))
+            );
+            hackdata[host] = data;
+        }
+    });
+    return hackdata;
+}
+export function analyzeRunningScripts(ns, serverdata, hackdata){
+    let scriptCounts = {};
+    Object.keys(hackdata).forEach(host => {
+       scriptCounts[host] = {'/scripts/h.script':0,'/scripts/g.script':0,'/scripts/w.script':0};
+    });
+    Object.keys(serverdata).forEach(host => {
+        let scripts = serverdata[host].runningScripts;
+        scripts.forEach(script => {
+            let target = script.args[0];
+            if(scriptCounts[target] != null && scriptCounts[target][script.filename] != null){
+                scriptCounts[target][script.filename]+= script.threads;
+            }
+        });
+    });
+    return scriptCounts;
+}
+//farmdata: how much of each to run on what
+export function getFarmdata(ns,hackdata,scriptCounts){
+    let farmdata = [];
+    Object.keys(hackdata).forEach(host => {
+        let hackable = hackdata[host];
+        let data = {};
+        data.name = host;
+        data.weakensTodo =
+            hackable.numWeakensNeeded +
+            scriptCounts[host]['/scripts/g.script'] * growSec +
+            scriptCounts[host]['/scripts/h.script'] * hackSec -
+            scriptCounts[host]['/scripts/w.script'];
+        data.hacksTodo = hackable.numHacksNeeded - scriptCounts[host]['/scripts/h.script'];
+        data.growsTodo = hackable.numGrowsNeeded - scriptCounts[host]['/scripts/g.script'];
+        data.priority = hackPriority(ns,host);
+        farmdata.unshift(data);
+    });
+    farmdata.sort((a,b) => {
+        return b.priority - a.priority;
+    });
+    return farmdata;
+}
+export function farm(ns,farmdata){
+    for(let i = 0; i < farmdata.length;i++){
+        let name = farmdata[i].name;
+        distribute(ns,'/scripts/w.script',farmdata[i].weakensTodo,name,"EFFECT");
+        distribute(ns,'/scripts/g.script',farmdata[i].growsTodo,name,false);
+        distribute(ns,'/scripts/h.script',farmdata[i].hacksTodo,name,true);
+    }
+    distribute(ns,'/scripts/w.script',1000000,'joesguns',"EXPERIENCE");
+}
+export async function main(ns){
+    ns.disableLog('ALL');
+    let servers = serverList;
+    servers.forEach(server => {getRootAccess(ns,server);});
+    let hackdata = getHackdata(ns,servers);
+    let serverdata = getServerdata(ns,servers);
+    let scriptcounts = analyzeRunningScripts(ns,serverdata,hackdata);
+    let farmdata = getFarmdata(ns,hackdata,scriptcounts);
+    farm(ns,farmdata);
+    await ns.sleep(5000);
+    ns.spawn('main.ns',1);
+}

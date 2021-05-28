@@ -1,0 +1,28 @@
+import {getRootAccess} from "root.ns";
+export function analyze(ns,computer){
+    getRootAccess(ns,computer);
+    let data = {};
+    data.hostname = computer;
+    data.money = ns.getServerMoneyAvailable(computer);
+    data.maxMoney = ns.getServerMaxMoney(computer);
+    data.growth = ns.getServerGrowth(computer);
+    data.security = ns.getServerSecurityLevel(computer);
+    data.minSecurity = ns.getServerMinSecurityLevel(computer);
+    data.level = ns.getServerRequiredHackingLevel(computer);
+    data.rooted = ns.hasRootAccess(computer);
+    data.maxRam = ns.getServerMaxRam(computer);
+    data.usedRam = ns.getServerUsedRam(computer);
+    data.hackChance = ns.hackChance(computer);
+    data.hackAnalyzePercent = ns.hackAnalyzePercent(computer);
+    data.hackTime = ns.getHackTime(computer);
+    data.growTime = ns.getGrowTime(computer);
+    data.weakenTime = ns.getWeakenTime(computer);
+    return data;
+}
+export async function main(ns){
+    if(ns.args.length <1){
+        ns.tprint('usage: run analyze.ns foodnstuff');
+        ns.exit();
+    }
+    ns.tprint(JSON.stringify(analyze(ns,ns.args[0]), null, 1));
+}

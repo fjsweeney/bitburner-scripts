@@ -1,0 +1,29 @@
+export function maxSum(arr){
+    let result = arr[0];
+    for(let i = 0; i <arr.length;i++){
+        for(let j = i; j<arr.length;j++){
+            let current = 0;
+            for(let k = i; k<=j;k++){
+                current += arr[k];
+            }
+            if(current>result){
+                result = current;
+            }
+        }
+    }
+    return result;
+}
+export function solve(ns,contract,server){
+    return maxSum(ns.codingcontract.getData(contract,server));
+}
+export async function main(ns) {
+    if(ns.getContractType(ns.args[0],ns.args[1]) != "Subarray with Maximum Sum"){
+        ns.tprint(ns.args[0]+ "(on "+ns.args[1]+") is not a Subarray with Maximum Sum contract.");
+        ns.exit();
+    }
+    ns.tprint(
+        ns.codingcontract.attempt(
+            solve(ns,ns.args[0],ns.args[1]),
+        ns.args[0],ns.args[1],{"returnReward":true})
+    );
+}

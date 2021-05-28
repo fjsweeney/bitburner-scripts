@@ -1,0 +1,37 @@
+//run getInfo.ns foodnstuff
+import {analyze} from "analyze.ns";
+import {netdata} from 'netdata.ns';
+
+export function getPath(ns,computer){
+    let parents = netdata;
+    let path=[];
+    path.unshift(computer);
+    while(parents[computer] != "home"){
+        path.unshift(parents[computer]);
+        computer = parents[computer];
+    }
+    return path;
+}
+export function toPathStr(path){
+    let connectStr = "home;";
+    while(path.length>0){
+        connectStr += " connect "+path.shift()+";";
+    }
+    return connectStr;
+}
+export function getPathStr(ns, computer){
+    let path = getPath(ns,computer);
+    return toPathStr(path);
+}
+export async function main(ns){
+    if(ns.args.length <= 0){
+        ns.tprint("Usage:");
+        ns.tprint("run getInfo.ns [server]");
+    }
+    try {
+        ns.tprint(JSON.stringify(analyze(ns,ns.args[0]),null,4));
+        ns.tprint(getPathStr(ns,ns.args[0]));
+    } catch (e) {
+        ns.tprint("Server not found.");    
+    }
+}

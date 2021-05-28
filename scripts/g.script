@@ -1,0 +1,6 @@
+if(args.length<1){
+    tprint('grow called without a target');
+    exit();
+}
+var affectStocks = args.length>1;
+grow(args[0],{"stock":affectStocks});

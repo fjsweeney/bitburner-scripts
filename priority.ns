@@ -1,0 +1,21 @@
+export function hackPriority(ns, host,hackingLevel){
+    if(hackingLevel==null){
+        hackingLevel=ns.getHackingLevel();
+    }
+    if(ns.hasRootAccess(host) && ns.getServerRequiredHackingLevel(host) <= hackingLevel && host != 'home'){
+        let hackingLevelDifference = (hackingLevel-ns.getServerRequiredHackingLevel(host));
+        return Math.floor( 
+            ((ns.getServerMaxMoney(host)/10000) * hackingLevelDifference) +
+            (ns.getServerGrowth(host) * (ns.getServerMaxMoney(host)/10000)) -
+            (ns.getServerMinSecurityLevel(host) * ns.getServerMinSecurityLevel(host) * 
+             ns.getServerMinSecurityLevel(host) * 
+             ns.getHackTime(host) *
+             ns.getServerRequiredHackingLevel(host) * ns.getServerRequiredHackingLevel(host))
+        );
+    } else {
+        return 0;
+    }
+}
+export async function main(ns) {
+    ns.tprint(hackPriority(ns,ns.args[0],ns.args[1]));
+}

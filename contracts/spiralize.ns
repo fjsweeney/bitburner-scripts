@@ -1,0 +1,50 @@
+export function spiralize(arr){
+    let result = [];
+    let direction = 'right';
+    let row = 0;
+    while(arr.length>0){
+        switch(direction){
+            case 'right':
+                result.push(arr[0].shift());
+                if(arr[0].length <=0){
+                    arr.shift();
+                    direction='down';
+                    row=0;
+                }
+                break;
+            case 'down':
+                result.push(arr[row].pop());
+                row++;
+                if(row==arr.length){
+                    row--;
+                    direction='left';
+                }
+                break;
+            case 'left':
+                result.push(arr[row].pop());
+                if(arr[row].length<=0){
+                    arr.pop();
+                    row--;
+                    direction='up';
+                }
+                break;
+            case 'up':
+                result.push(arr[row].shift());
+                if(row==0){
+                    direction='right';
+                }
+                break;
+        }
+    }
+    return result;
+}
+export function solve(ns,contract,server){
+    return spiralize(ns.codingcontract.getData(contract,server));
+}
+export async function main(ns) {
+    ns.tprint(
+        ns.codingcontract.attempt(
+            solve(ns,ns.args[0],ns.args[1]),
+        ns.args[0],ns.args[1],{"returnReward":true})
+    );
+}

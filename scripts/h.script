@@ -1,0 +1,6 @@
+if(args.length<1){
+    tprint('hack called without a target');
+    exit();
+}
+var affectStocks = args.length>1;
+hack(args[0], {"stock":affectStocks});
